@@ -14,7 +14,7 @@ class SongWorkoutMapper:
         self.level = level
         self.mode = {"LOW":1, "MED":1.45, "HIGH":1.9}
         self.song_pick = {"LOW":0, "MED":1, "HIGH":2}
-        self.json_file_path = "songs/artist_directory.json"
+        self.json_file_path = "artists/artist_directory.json"
         with open(self.json_file_path, 'r') as f:
             self.artist_data = json.load(f)
         if self.artist_data[artist][self.song_pick[level]]:
