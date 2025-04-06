@@ -4,16 +4,27 @@ import numpy as np
 import json
 
 class SongWorkoutMapper:
-    def __init__(self, json_file_path):
+    def __init__(self, artist, level):
         """
         Initialize the SongWorkoutMapper with the path to the song analysis JSON file.
         
         Args:
             json_file_path: Path to the song analysis JSON file
         """
-        self.json_file_path = json_file_path
+        self.level = level
+        self.mode = {"LOW":1, "MED":1.45, "HIGH":1.9}
+        self.song_pick = {"LOW":0, "MED":1, "HIGH":2}
+        self.json_file_path = "songs/artist_directory.json"
+        with open(self.json_file_path, 'r') as f:
+            self.artist_data = json.load(f)
+        if self.artist_data[artist][self.song_pick[level]]:
+            self.song_fp = self.artist_data[artist][self.song_pick[level]]
+        elif self.artist_data[artist][self.song_pick[level]-1]:
+            self.song_fp = self.artist_data[artist][self.song_pick[level]-1]
+        else:
+            self.song_fp = self.artist_data[artist][self.song_pick[level]-2]
         self.workouts_fp = "workouts/workouts.json" ###check filepaths functioning
-        with open(json_file_path, 'r') as f:
+        with open(self.song_fp, 'r') as f:
             self.song_data = json.load(f)
         with open(self.workouts_fp, 'r') as f:
             self.workouts = json.load(f)
@@ -54,8 +65,8 @@ class SongWorkoutMapper:
             List of tuples representing the final song cut with repeated sections
 
         """
-        self.mode = {"LOW":1, "MED":1.45, "HIGH":1.9}
-        factor = self.mode[level]
+        
+        factor = self.mode[self.level]
         sections = self.create_dance_sections(self,stamina)
         routine = []
         for i in list(range(len(sections)-1)):
