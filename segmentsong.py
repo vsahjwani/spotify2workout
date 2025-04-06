@@ -25,7 +25,7 @@ class SongWorkoutMapper:
         self.sections = self.song_data['sections']
         
     def create_dance_sections(self,max_section = 45):
-        with open(json_file_path, 'r') as f:
+        with open(self.json_file_path, 'r') as f:
             data = json.load(f)
         
         time=[]
@@ -41,8 +41,9 @@ class SongWorkoutMapper:
         time.append(data['track']['duration'])
         return time
 
-    def create_workout(self, intensity=30, stamina = 45):
+    def create_workout(self, level, stamina = 45):
         """
+        LEVELS CAN BE LOW, MED, HIGH
         Creates a song cut by selecting and repeating sections to match the desired length
         while maintaining musical coherence.
         
@@ -51,20 +52,19 @@ class SongWorkoutMapper:
             
         Returns:
             List of tuples representing the final song cut with repeated sections
+
         """
+        self.mode = {"LOW":1, "MED":1.45, "HIGH":1.9}
+        factor = self.mode[level]
         sections = self.create_dance_sections(self,stamina)
-        
         routine = []
         for i in list(range(len(sections)-1)):
+            length = sections[i+1]-sections[i]
             if i == 0:
-                cond_2 = sections[i+1]-sections[i]>intensity
-                filtered = list(filter(lambda k: not cond_2 in self.workouts[k], self.workouts))
-                choice = np.random.choice(filtered)
-                routine.append(choice)
+                choice =np.random.choice(self.workouts.keys)
             else:
                 cond_1 = self.workouts[routine[i-1]][0]
-                cond_2 = sections[i+1]-sections[i]>intensity
-                filtered = list(filter(lambda k: not cond_1 in self.workouts[k] and not cond_2 in self.workouts[k], self.workouts))
+                filtered = list(filter(lambda k: not cond_1 in self.workouts[k], self.workouts))
                 choice = np.random.choice(filtered)
-                routine.append(choice)
+            routine.append((choice, factor*length/self.workouts[choice][-1]))
         return routine
